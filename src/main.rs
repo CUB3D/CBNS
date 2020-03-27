@@ -73,7 +73,7 @@ async fn status_handle(srv: web::Data<Addr<NotificationServer>>) -> Result<HttpR
     Ok(HttpResponse::Ok().json(status))
 }
 
-//TODO: tokio
+//TODO: tokio, status page, tcp socket for polling as well
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();

@@ -5,6 +5,7 @@ FROM ${BASE_IMAGE} AS builder
 
 # Add our source code.
 ADD ./src/ ./src/
+ADD ./templates ./templates/
 ADD Cargo.toml .
 
 # Fix permissions on source code.
