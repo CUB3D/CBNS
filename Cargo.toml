@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 actix = "0.8.3"
-actix-web = "1.0.3"
+actix-web = "1.0"
 actix-web-actors = "1.0.1"
 
 json = "0.11"
