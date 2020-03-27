@@ -1,13 +1,16 @@
-use actix::{Recipient, Actor, Context, Handler};
-use crate::messages::{PushedMsg, ConnectMsg, ChannelNotificationMsg, DisconnectMsg, DeviceStatusRequestMsg, StatusRequestMsg, DeviceNotificationMsg, DeviceSubscribeMsg, DeviceUnsubscribeMsg};
-use std::collections::HashMap;
+use crate::messages::{
+    ChannelNotificationMsg, ConnectMsg, DeviceNotificationMsg, DeviceStatusRequestMsg,
+    DeviceSubscribeMsg, DeviceUnsubscribeMsg, DisconnectMsg, PushedMsg, StatusRequestMsg,
+};
+use actix::{Actor, Context, Handler, Recipient};
 use rand::Rng;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct Client {
     pub identifier: String,
     pub message_recipient: Recipient<PushedMsg>,
-    pub uid: usize
+    pub uid: usize,
 }
 
 impl Client {
@@ -15,26 +18,26 @@ impl Client {
         Client {
             identifier,
             message_recipient,
-            uid
+            uid,
         }
     }
 }
 
 pub struct Channel {
-    pub clients: Vec<Client>
+    pub clients: Vec<Client>,
 }
 
 impl Default for Channel {
     fn default() -> Self {
         Channel {
-            clients: Vec::new()
+            clients: Vec::new(),
         }
     }
 }
 
 impl Channel {
     pub fn remove_by_uid(&mut self, uid: usize) {
-        let index = self.clients.iter().position(| item | item.uid == uid);
+        let index = self.clients.iter().position(|item| item.uid == uid);
 
         if let Some(i) = index {
             self.clients.remove(i);
@@ -42,7 +45,10 @@ impl Channel {
     }
 
     pub fn contains_device_by_token(&self, token: String) -> bool {
-        let index = self.clients.iter().position(| item | item.identifier == token);
+        let index = self
+            .clients
+            .iter()
+            .position(|item| item.identifier == token);
 
         return index.is_some();
     }
@@ -52,7 +58,7 @@ pub struct NotificationServer {
     pub channels: HashMap<String, Channel>,
     pub clients: HashMap<String, Client>,
     // Stores a list of messages that were sent to an unknown client, will be sent if they connect
-    pub client_message_queue: HashMap<String, Vec<String>> // Client ID => Message content
+    pub client_message_queue: HashMap<String, Vec<String>>, // Client ID => Message content
 }
 
 impl NotificationServer {
@@ -61,7 +67,8 @@ impl NotificationServer {
             Some(channel) => channel,
             None => {
                 // If needed then add a new channel
-                self.channels.insert(channel_name.to_string(), Channel::default());
+                self.channels
+                    .insert(channel_name.to_string(), Channel::default());
                 self.channels.get_mut(channel_name).unwrap()
             }
         };
@@ -85,14 +92,13 @@ impl Actor for NotificationServer {
 
 impl Default for NotificationServer {
     fn default() -> Self {
-
         let mut channels: HashMap<String, Channel> = HashMap::new();
         channels.insert("device_common".to_string(), Channel::default());
 
         NotificationServer {
             channels,
             clients: HashMap::new(),
-            client_message_queue: HashMap::new()
+            client_message_queue: HashMap::new(),
         }
     }
 }
@@ -103,11 +109,7 @@ impl Handler<ConnectMsg> for NotificationServer {
     fn handle(&mut self, msg: ConnectMsg, _: &mut Context<Self>) -> Self::Result {
         let uid = rand::thread_rng().gen();
 
-        let client = Client::new(
-            msg.token.clone(),
-            msg.addr,
-            uid
-        );
+        let client = Client::new(msg.token.clone(), msg.addr, uid);
 
         println!("Registered client '{}':{}", &client.identifier, &client.uid);
 
@@ -115,7 +117,10 @@ impl Handler<ConnectMsg> for NotificationServer {
         let common_channel = self.channels.get_mut("device_common");
 
         if let Some(c) = common_channel {
-            println!("Client '{}' registering for 'device_common'", &client.identifier);
+            println!(
+                "Client '{}' registering for 'device_common'",
+                &client.identifier
+            );
             c.clients.push(client.clone());
         }
 
@@ -127,14 +132,15 @@ impl Handler<ConnectMsg> for NotificationServer {
             let queuedMessages = &self.client_message_queue[&msg.token];
 
             for queued_message in queuedMessages {
-                let status = client.message_recipient.do_send(
-                    PushedMsg {
-                        message: queued_message.clone()
-                    }
-                );
+                let status = client.message_recipient.do_send(PushedMsg {
+                    message: queued_message.clone(),
+                });
 
                 if let Err(status) = status {
-                    eprintln!("Unable to send queued message to client: '{}', {}, {}", &msg.token, queued_message, status);
+                    eprintln!(
+                        "Unable to send queued message to client: '{}', {}, {}",
+                        &msg.token, queued_message, status
+                    );
                 }
             }
 
@@ -168,14 +174,15 @@ impl Handler<ChannelNotificationMsg> for NotificationServer {
 
         if let Some(c) = channel {
             for client in &c.clients {
-                let status = client.message_recipient.do_send(
-                    PushedMsg {
-                        message: msg.message.clone()
-                    }
-                );
+                let status = client.message_recipient.do_send(PushedMsg {
+                    message: msg.message.clone(),
+                });
 
                 if let Err(status) = status {
-                    eprintln!("Unable to send message to client: '{}': {}", client.identifier, status);
+                    eprintln!(
+                        "Unable to send message to client: '{}': {}",
+                        client.identifier, status
+                    );
                 }
             }
         }
@@ -188,7 +195,7 @@ impl Handler<DeviceStatusRequestMsg> for NotificationServer {
     fn handle(&mut self, msg: DeviceStatusRequestMsg, _: &mut Context<Self>) -> Self::Result {
         for channel in self.channels.values() {
             if channel.contains_device_by_token(msg.token.clone()) {
-                return "Device Connected".to_string()
+                return "Device Connected".to_string();
             }
         }
 
@@ -199,8 +206,8 @@ impl Handler<DeviceStatusRequestMsg> for NotificationServer {
 impl Handler<StatusRequestMsg> for NotificationServer {
     type Result = String;
 
-    fn handle(&mut self, msg: StatusRequestMsg, _: &mut Context<Self>) -> Self::Result {
-//        let clients = self.token_map.keys();
+    fn handle(&mut self, _msg: StatusRequestMsg, _: &mut Context<Self>) -> Self::Result {
+        //        let clients = self.token_map.keys();
 
         let mut s = String::new();
 
@@ -221,26 +228,32 @@ impl Handler<DeviceNotificationMsg> for NotificationServer {
     fn handle(&mut self, msg: DeviceNotificationMsg, _: &mut Context<Self>) -> Self::Result {
         //Is the client connected?
         if let Some(client) = self.clients.get(msg.device_token.as_str()) {
-            let status = client.message_recipient.do_send(
-                PushedMsg {
-                    message: msg.message.clone()
-                }
-            );
+            let status = client.message_recipient.do_send(PushedMsg {
+                message: msg.message.clone(),
+            });
 
-            if let Err(status) = status {
+            if let Err(_status) = status {
                 eprintln!("Unable to send message to client: '{}'", client.identifier);
             }
-        } else { // Client isnt currently connected
+        } else {
+            // Client isnt currently connected
             // Should the message be queued for later, assume yes for now and create a new msg queue if we need one
 
             if !self.client_message_queue.contains_key(&msg.device_token) {
-                self.client_message_queue.insert(msg.device_token.clone(), Vec::new());
+                self.client_message_queue
+                    .insert(msg.device_token.clone(), Vec::new());
             }
 
-            let this_client_msg_queue = self.client_message_queue.get_mut(&msg.device_token).expect("No message queue found for user, this shouldnt happen");
+            let this_client_msg_queue = self
+                .client_message_queue
+                .get_mut(&msg.device_token)
+                .expect("No message queue found for user, this shouldnt happen");
             this_client_msg_queue.push(msg.message.clone());
 
-            println!("Message sent to unknown client: {}, queued for reconnect", &msg.device_token)
+            println!(
+                "Message sent to unknown client: {}, queued for reconnect",
+                &msg.device_token
+            )
         }
     }
 }
