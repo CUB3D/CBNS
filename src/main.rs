@@ -74,7 +74,7 @@ async fn status_handle(srv: web::Data<Addr<NotificationServer>>) -> Result<HttpR
 }
 
 //TODO: tokio
-#[tokio::main]
+#[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=info");
