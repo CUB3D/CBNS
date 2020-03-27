@@ -29,7 +29,7 @@ pub async fn socket_poll(
         },
         &req,
         stream,
-    ).expect("Unable to start websocket");
+    )
 
-    Ok(HttpResponse::Ok().finish())
+    //Ok(HttpResponse::Ok().finish())
 }

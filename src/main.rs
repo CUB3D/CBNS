@@ -74,13 +74,11 @@ async fn status_handle(srv: web::Data<Addr<NotificationServer>>) -> Result<HttpR
 }
 
 //TODO: tokio
-#[actix_rt::main]
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
-
-    // let system = actix::System::new("cbns");
 
     let server = NotificationServer::default().start();
 
@@ -110,7 +108,4 @@ async fn main() -> std::io::Result<()> {
     .bind("0.0.0.0:8080").unwrap()
     .run()
     .await
-    // .start();
-
-    // system.run()
 }
