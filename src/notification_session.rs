@@ -80,7 +80,7 @@ impl Handler<PushedMsg> for WSNotificationSession {
     }
 }
 
-impl StreamHandler<ws::Message, ws::ProtocolError> for WSNotificationSession {
+impl StreamHandler<ws::Message> for WSNotificationSession {
     fn handle(&mut self, item: Message, _ctx: &mut Self::Context) {
         if let Text(msg) = item {
             println!("Got text message from client '{}': {}", self.token, &msg);

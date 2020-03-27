@@ -8,35 +8,41 @@ pub struct ConnectMsg {
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct DisconnectMsg {
     pub uid: usize,
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct ChannelNotificationMsg {
     pub channel: String,
     pub message: String,
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct DeviceNotificationMsg {
     pub device_token: String,
     pub message: String,
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct DeviceSubscribeMsg {
     pub device_token: String,
     pub channel: String,
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct DeviceUnsubscribeMsg {
     pub device_token: String,
     pub channel: String,
 }
 
 #[derive(actix::Message)]
+#[rtype(result = "()")]
 pub struct PushedMsg {
     pub message: String,
 }
