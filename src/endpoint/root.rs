@@ -8,7 +8,7 @@ struct IndexTemplate {
     connected_devices: u32,
 }
 
-pub fn root_handler() -> Result<HttpResponse, Error> {
+pub async fn root_handler() -> Result<HttpResponse, Error> {
     let tpl = IndexTemplate {
         connected_devices: 0,
     }

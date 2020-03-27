@@ -39,21 +39,21 @@ struct TokenExtractor {
     token: String,
 }
 
-fn message_post(
+async fn message_post(
     path: web::Path<PostRequest>,
     srv: web::Data<Addr<NotificationServer>>,
-) -> impl Future<Item = HttpResponse, Error = AWError> {
+) -> Result<HttpResponse, AWError> {
     srv.send(ChannelNotificationMsg {
         channel: path.destination.clone(),
         message: path.data.clone(),
     })
-    .wait()
+    .await
     .unwrap();
 
-    ok(HttpResponse::Ok().body("Ok"))
+    Ok(HttpResponse::Ok().body("Ok"))
 }
 
-fn message_device_status(
+async fn message_device_status(
     srv: web::Data<Addr<NotificationServer>>,
     path: web::Path<TokenExtractor>,
 ) -> Result<HttpResponse, AWError> {
@@ -61,24 +61,26 @@ fn message_device_status(
         .send(DeviceStatusRequestMsg {
             token: path.token.clone(),
         })
-        .wait()
+        .await
         .unwrap();
 
     Ok(HttpResponse::Ok().json(status))
 }
 
-fn status_handle(srv: web::Data<Addr<NotificationServer>>) -> Result<HttpResponse, AWError> {
-    let status = srv.send(StatusRequestMsg {}).wait().unwrap();
+async fn status_handle(srv: web::Data<Addr<NotificationServer>>) -> Result<HttpResponse, AWError> {
+    let status = srv.send(StatusRequestMsg {}).await.unwrap();
 
     Ok(HttpResponse::Ok().json(status))
 }
 
-fn main() -> std::io::Result<()> {
+//TODO: tokio
+#[actix_rt::main]
+async fn main() -> std::io::Result<()> {
     dotenv().ok();
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
 
-    let system = actix::System::new("cbns");
+    // let system = actix::System::new("cbns");
 
     let server = NotificationServer::default().start();
 
@@ -94,20 +96,21 @@ fn main() -> std::io::Result<()> {
             //TODO: remove this
             .service(
                 web::resource("/post/{destination}/{data}")
-                    .route(web::post().to_async(message_post)),
+                    .route(web::post().to(message_post)),
             )
             .service(
                 web::resource("/channel/{channel}/post")
-                    .route(web::post().to_async(post_channel_handle)),
+                    .route(web::post().to(post_channel_handle)),
             )
             .service(
                 web::resource("/device/{token}/post")
-                    .route(web::post().to_async(post_device_handle)),
+                    .route(web::post().to(post_device_handle)),
             )
     })
-    .bind("0.0.0.0:8080")
-    .unwrap()
-    .start();
+    .bind("0.0.0.0:8080").unwrap()
+    .run()
+    .await
+    // .start();
 
-    system.run()
+    // system.run()
 }

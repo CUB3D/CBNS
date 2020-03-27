@@ -11,13 +11,15 @@ pub struct PollExtractor {
     token: String,
 }
 
-pub fn socket_poll(
+pub async fn socket_poll(
     req: HttpRequest,
     stream: web::Payload,
     srv: web::Data<Addr<NotificationServer>>,
     path_params: web::Path<PollExtractor>,
 ) -> Result<HttpResponse, Error> {
     let params = path_params.into_inner();
+
+    // unimplemented!();
 
     ws::start(
         WSNotificationSession {
@@ -27,5 +29,7 @@ pub fn socket_poll(
         },
         &req,
         stream,
-    )
+    ).expect("Unable to start websocket");
+
+    Ok(HttpResponse::Ok().finish())
 }

@@ -13,11 +13,11 @@ pub struct PostDeviceExtractor {
     token: String,
 }
 
-pub fn post_device_handle(
+pub async fn post_device_handle(
     path: web::Path<PostDeviceExtractor>,
     notification_body: web::Json<Notification>,
     srv: web::Data<Addr<NotificationServer>>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
+) -> Result<HttpResponse, Error> {
     let msg = serde_json::to_string(&notification_body.0);
 
     if let Ok(msg) = msg {
@@ -25,11 +25,11 @@ pub fn post_device_handle(
             device_token: path.token.clone(),
             message: msg,
         })
-        .wait()
+        .await
         .unwrap();
     } else {
         println!("Unable to handle message {:?}", msg);
     }
 
-    ok(HttpResponse::Ok().body("Ok"))
+    Ok(HttpResponse::Ok().body("Ok"))
 }
