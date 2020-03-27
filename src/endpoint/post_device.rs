@@ -4,8 +4,7 @@ use crate::notification_server::NotificationServer;
 use actix::Addr;
 use actix_web::Error;
 use actix_web::{web, HttpResponse};
-use futures::future::ok;
-use futures::Future;
+
 use serde::Deserialize;
 
 #[derive(Deserialize)]

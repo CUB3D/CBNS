@@ -1,7 +1,7 @@
 use actix::*;
 
 use actix_web::{middleware, web, App, Error as AWError, HttpResponse, HttpServer};
-use futures::future::{ok, Future};
+
 use serde::Deserialize;
 
 extern crate futures;
@@ -93,19 +93,17 @@ async fn main() -> std::io::Result<()> {
             .service(web::resource("/status/{token}").route(web::get().to(message_device_status)))
             //TODO: remove this
             .service(
-                web::resource("/post/{destination}/{data}")
-                    .route(web::post().to(message_post)),
+                web::resource("/post/{destination}/{data}").route(web::post().to(message_post)),
             )
             .service(
-                web::resource("/channel/{channel}/post")
-                    .route(web::post().to(post_channel_handle)),
+                web::resource("/channel/{channel}/post").route(web::post().to(post_channel_handle)),
             )
             .service(
-                web::resource("/device/{token}/post")
-                    .route(web::post().to(post_device_handle)),
+                web::resource("/device/{token}/post").route(web::post().to(post_device_handle)),
             )
     })
-    .bind("0.0.0.0:8080").unwrap()
+    .bind("0.0.0.0:8080")
+    .unwrap()
     .run()
     .await
 }
