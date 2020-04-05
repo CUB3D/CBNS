@@ -1,9 +1,6 @@
 use crate::client_action::ClientAction;
 
-use crate::messages::{
-    ConnectMsg, DeviceNotificationMsg, DeviceSubscribeMsg, DeviceUnsubscribeMsg, DisconnectMsg,
-    PushedMsg,
-};
+use crate::messages::{ConnectMsg, DeviceNotificationMsg, DeviceSubscribeMsg, DeviceUnsubscribeMsg, DisconnectMsg, PushedMsg, ChannelNotificationMsg};
 use crate::notification_server::NotificationServer;
 
 use actix::*;
@@ -106,6 +103,20 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WSNotificationSes
                                 )
                                 .unwrap(),
                             })
+                        },
+                        "BROADCAST_CHANNEL" => {
+                            let target = action.target.expect("No target given");
+
+                            println!("Sending broadcast to channel '{}'", target);
+                            self.server_address.do_send(ChannelNotificationMsg {
+                                channel: target,
+                                message: serde_json::to_string(
+                                    &action
+                                        .notification_payload
+                                        .expect("No notification payload given"),
+                                )
+                                .unwrap(),
+                            })
                         }
                         "SUBSCRIBE" => {
                             let target = action.target.expect("No target given");
@@ -134,8 +145,13 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WSNotificationSes
                             })
                         }
 
-                        _ => {}
+                        _ => {
+                            eprintln!("Got unknown action: {}", action.action_name);
+                        }
                     }
+                } else {
+                    let e = client_message.err().unwrap();
+                    eprintln!("Unable to parse message: {}", e);
                 }
             } else {
                 println!(

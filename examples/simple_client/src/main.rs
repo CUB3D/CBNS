@@ -30,9 +30,7 @@ async fn main() {
             let mut input = String::new();
             match io::stdin().read_line(&mut input) {
                 Ok(n) => {
-                    println!("{} bytes read", n);
-                    println!("{}", input);
-                    write.send(Message::Text(input));
+                    write.send(Message::Text(format!("{{\"action_name\": \"BROADCAST_CHANNEL\", \"target\": \"device_common\", \"notification_payload\": {{\"targetAppID\": \"\", \"dataPayload\": [{{\"key\": \"message\", \"value\": \"{}\"}}] }} }}", input.trim()))).await;
                 }
                 Err(error) => println!("error: {}", error),
             }

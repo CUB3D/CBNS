@@ -129,9 +129,10 @@ impl Handler<ConnectMsg> for NotificationServer {
 
         // See if they have any queued messages
         if self.client_message_queue.contains_key(&msg.token) {
-            let mut queuedMessages = &mut self.client_message_queue[&msg.token];
+            let queued_messages = self.client_message_queue.get_mut(&msg.token).expect("No entry in queue");
+            let mut sent: Vec<usize> = Vec::with_capacity(queued_messages.len());
 
-            for queued_message in queuedMessages {
+            for (ind, queued_message) in queued_messages.iter().enumerate() {
                 let status = client.message_recipient.do_send(PushedMsg {
                     message: queued_message.clone(),
                 });
@@ -142,13 +143,17 @@ impl Handler<ConnectMsg> for NotificationServer {
                         &msg.token, queued_message, status
                     );
                 } else {
-                    queuedMessages.remove_item(queued_message)
+                    sent.push(ind);
                 }
             }
 
-            if queuedMessages.is_empty() {
+            for sent_id in sent {
+                queued_messages.remove(sent_id);
+            }
+
+            if queued_messages.is_empty() {
                 // This msg queue isnt needed anymore, free up some memory
-                self.client_message_queue.remove(&msg.token)
+                self.client_message_queue.remove(&msg.token);
             }
         }
 
