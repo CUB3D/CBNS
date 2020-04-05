@@ -129,7 +129,7 @@ impl Handler<ConnectMsg> for NotificationServer {
 
         // See if they have any queued messages
         if self.client_message_queue.contains_key(&msg.token) {
-            let queuedMessages = &self.client_message_queue[&msg.token];
+            let mut queuedMessages = &mut self.client_message_queue[&msg.token];
 
             for queued_message in queuedMessages {
                 let status = client.message_recipient.do_send(PushedMsg {
@@ -141,11 +141,15 @@ impl Handler<ConnectMsg> for NotificationServer {
                         "Unable to send queued message to client: '{}', {}, {}",
                         &msg.token, queued_message, status
                     );
+                } else {
+                    queuedMessages.remove_item(queued_message)
                 }
             }
 
-            // This msg queue isnt needed anymore, free up some memory
-            self.client_message_queue.remove(&msg.token);
+            if queuedMessages.is_empty() {
+                // This msg queue isnt needed anymore, free up some memory
+                self.client_message_queue.remove(&msg.token)
+            }
         }
 
         uid

@@ -1,3 +1,5 @@
+#![feature(vec_remove_item)]
+
 use actix::*;
 
 use actix_web::{middleware, web, App, Error as AWError, HttpResponse, HttpServer};

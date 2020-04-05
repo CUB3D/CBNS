@@ -1,0 +1,15 @@
+[package]
+name = "simple_client"
+version = "0.1.0"
+authors = ["CUB3D <callumthom11@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "0.2.11", features = ["full"] }
+tokio-tungstenite = "*"
+futures-util = { version = "0.3", default-features = false, features = ["async-await", "sink", "std"] }
+futures-channel = "0.3"
+url = "2.0.0"
+rand = "0.6.5"
