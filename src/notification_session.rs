@@ -19,7 +19,7 @@ pub struct WSNotificationSession {
     pub token: String,
 }
 
-const DEVICE_STATUS_UPDATE_INTERVAL: Duration = Duration::from_secs(8 * 60);
+//TODO: const DEVICE_STATUS_UPDATE_INTERVAL: Duration = Duration::from_secs(8 * 60);
 //TODO: test different durations for this
 // Set the delay between keep-alive pings
 const DEVICE_PING_INTERVAL: Duration = Duration::from_secs(10);
@@ -69,7 +69,7 @@ impl Actor for WSNotificationSession {
         println!("Websocket DC");
 
         //TODO: error handling
-        block_on(self.server_address.send(DisconnectMsg { uid: self.uid }));
+        block_on(self.server_address.send(DisconnectMsg { uid: self.uid })).unwrap();
 
         Running::Stop
     }

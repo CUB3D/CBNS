@@ -50,7 +50,7 @@ impl Channel {
             .iter()
             .position(|item| item.identifier == token);
 
-        return index.is_some();
+        index.is_some()
     }
 }
 
@@ -211,7 +211,7 @@ impl Handler<DeviceStatusRequestMsg> for NotificationServer {
             }
         }
 
-        return "Device Not Found".to_string();
+        "Device Not Found".to_string()
     }
 }
 
@@ -230,7 +230,7 @@ impl Handler<StatusRequestMsg> for NotificationServer {
             }
         }
 
-        s.to_string()
+        s
     }
 }
 

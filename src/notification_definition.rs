@@ -10,9 +10,11 @@ pub struct PushMessagePayloadEntry {
 //TODO: remove targetappid and rename to dp
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Notification {
-    pub targetAppID: String,
+    #[serde(rename = "targetAppID")]
+    pub target_app_id: String,
     //    pub priority: NotificationPrioritory,
     //    pub requiresAcknoqledge: bool,
     //    pub message: PushMessagePayload,
-    pub dataPayload: Option<Vec<PushMessagePayloadEntry>>,
+    #[serde(rename = "dataPayload")]
+    pub data_payload: Option<Vec<PushMessagePayloadEntry>>,
 }
