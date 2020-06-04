@@ -19,8 +19,6 @@ pub async fn socket_poll(
 ) -> Result<HttpResponse, Error> {
     let params = path_params.into_inner();
 
-
-
     // unimplemented!();
 
     ws::start(

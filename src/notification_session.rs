@@ -1,6 +1,9 @@
 use crate::client_action::ClientAction;
 
-use crate::messages::{ConnectMsg, DeviceNotificationMsg, DeviceSubscribeMsg, DeviceUnsubscribeMsg, DisconnectMsg, PushedMsg, ChannelNotificationMsg};
+use crate::messages::{
+    ChannelNotificationMsg, ConnectMsg, DeviceNotificationMsg, DeviceSubscribeMsg,
+    DeviceUnsubscribeMsg, DisconnectMsg, PushedMsg,
+};
 use crate::notification_server::NotificationServer;
 
 use actix::*;
@@ -103,7 +106,7 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for WSNotificationSes
                                 )
                                 .unwrap(),
                             })
-                        },
+                        }
                         "BROADCAST_CHANNEL" => {
                             let target = action.target.expect("No target given");
 

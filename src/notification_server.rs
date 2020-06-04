@@ -129,7 +129,10 @@ impl Handler<ConnectMsg> for NotificationServer {
 
         // See if they have any queued messages
         if self.client_message_queue.contains_key(&msg.token) {
-            let queued_messages = self.client_message_queue.get_mut(&msg.token).expect("No entry in queue");
+            let queued_messages = self
+                .client_message_queue
+                .get_mut(&msg.token)
+                .expect("No entry in queue");
             let mut sent: Vec<usize> = Vec::with_capacity(queued_messages.len());
 
             for (ind, queued_message) in queued_messages.iter().enumerate() {
